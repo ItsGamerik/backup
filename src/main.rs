@@ -19,6 +19,7 @@ fn main() {
     let config_file_path = Path::new(config_file_arg);
     let mut arg = false;
     if args.iter().any(|arg| arg == "--dry-run") {
+        println!("using dry-run");
         arg = true;
     }
     check_conf(config_file_path);
