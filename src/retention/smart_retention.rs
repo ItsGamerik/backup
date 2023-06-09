@@ -7,7 +7,7 @@ use chrono::{Datelike, Local, Timelike};
 
 use crate::config_toml::check_and_read::read_conf;
 
-pub fn backupctrl(files: Vec<fs::DirEntry>, dry_run: bool) {
+pub fn backupctrl(files: Vec<fs::DirEntry>, dry_run: bool, conf_file: &Path) {
     let mut dir_names: Vec<String> = Vec::new();
     for file in files {
         if file.path().is_dir() {
@@ -18,10 +18,10 @@ pub fn backupctrl(files: Vec<fs::DirEntry>, dry_run: bool) {
             println!("no directories found");
         }
     }
-    compare(dir_names, dry_run);
+    compare(dir_names, dry_run, conf_file);
 }
 
-fn compare(dirs: Vec<String>, dry_run: bool) {
+fn compare(dirs: Vec<String>, dry_run: bool, conf_file: &Path) {
     let current_time = Local::now();
     let current_time_fmt = NaiveDate::from_ymd_opt(
         current_time.year(),
@@ -55,7 +55,7 @@ fn compare(dirs: Vec<String>, dry_run: bool) {
             if dry_run {
                 println!("would have deleted backup {}", file);
             } else {
-                let backup_path = read_conf().dirs.backup_dir;
+                let backup_path = read_conf(conf_file).dirs.backup_dir;
                 let long_path = backup_path + &file;
                 let file_path = Path::new(&long_path);
                 if let Err(e) = fs::remove_dir_all(file_path) {

@@ -9,12 +9,20 @@ use retention::smart_retention::backupctrl;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
+    let config_file_arg = match args.get(1) {
+        Some(arg) => {
+            println!("using config path from command line: {}", arg);
+            arg
+        },
+        None => "./config/config.toml",
+    };
+    let config_file_path = Path::new(config_file_arg);
     let mut arg = false;
     if args.iter().any(|arg| arg == "--dry-run") {
         arg = true;
     }
-    check_conf();
-    let conf_paths: Config = read_conf();
+    check_conf(config_file_path);
+    let conf_paths: Config = read_conf(config_file_path);
     let backup_dir = Path::new(&conf_paths.dirs.backup_dir);
     let iter = match fs::read_dir(backup_dir) {
         Ok(iter) => iter,
@@ -31,5 +39,5 @@ fn main() {
         };
         file_name_vec.push(file.unwrap());
     }
-    backupctrl(file_name_vec, arg);
+    backupctrl(file_name_vec, arg, config_file_path);
 }

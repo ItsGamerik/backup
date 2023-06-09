@@ -28,10 +28,10 @@ impl Config {
     }
 }
 
-pub fn check_conf() {
+pub fn check_conf(conf_file: &Path) {
     let config = Config::new();
     let conf_path = Path::new("./config");
-    let conf_file = Path::new("./config/config.toml");
+    // let conf_file = Path::new("./config/config.toml");
     if let Err(e) = fs::create_dir_all(conf_path) {
         eprintln!("could not create config folder: {}", e);
         return;
@@ -50,16 +50,16 @@ pub fn check_conf() {
     }
 }
 
-pub fn read_conf() -> Config {
+pub fn read_conf(conf_file: &Path) -> Config {
     let config_default = Config::new();
-    let config_path = Path::new("./config/config.toml");
-    let config_str: String = fs::read_to_string(config_path).unwrap();
+    // let config_file = Path::new("./config/config.toml");
+    let config_str: String = fs::read_to_string(conf_file).unwrap();
     let config_content: Config = match toml::from_str(&config_str) {
         Ok(conf) => conf,
         Err(e) => {
             eprintln!("error reading from file: {}", e);
             // TODO: add cmdline argument for config file
-            let mut conf_file = match File::create(config_path) {
+            let mut conf_file = match File::create(conf_file) {
                 Ok(file) => file,
                 Err(e) => panic!("an error occured while opening the config file: {}", e),
             };
