@@ -1,3 +1,4 @@
+use core::panic;
 use std::io::Write;
 use std::{
     fs::{self, File},
@@ -16,23 +17,23 @@ pub struct Keys {
     pub source_dir: String,
 }
 
-fn create_default() -> Config {
-    Config {
-        dirs: Keys {
-            backup_dir: "".to_string(),
-            source_dir: "".to_string(),
-        },
+impl Config {
+    fn new() -> Config {
+        Config {
+            dirs: Keys {
+                backup_dir: "CHANGE_ME".to_string(),
+                source_dir: "CHANGE_ME".to_string(),
+            },
+        }
     }
 }
 
 pub fn check_conf() {
-    let config = create_default();
-
+    let config = Config::new();
     let conf_path = Path::new("./config");
     let conf_file = Path::new("./config/config.toml");
     if let Err(e) = fs::create_dir_all(conf_path) {
-        // TODO: change error message
-        eprintln!("error: {}", e);
+        eprintln!("could not create config folder: {}", e);
         return;
     }
 
@@ -41,8 +42,7 @@ pub fn check_conf() {
             Ok(mut file) => {
                 let toml = toml::to_string(&config).unwrap();
                 if let Err(e) = writeln!(file, "{toml}") {
-                    // TODO: change error message
-                    eprintln!("error: {}", e);
+                    eprintln!("could not write default config: {}", e);
                 }
             }
             Err(e) => eprintln!("could not read file: {}", e),
@@ -51,14 +51,18 @@ pub fn check_conf() {
 }
 
 pub fn read_conf() -> Config {
-    let config_default = create_default();
+    let config_default = Config::new();
     let config_path = Path::new("./config/config.toml");
     let config_str: String = fs::read_to_string(config_path).unwrap();
     let config_content: Config = match toml::from_str(&config_str) {
         Ok(conf) => conf,
         Err(e) => {
             eprintln!("error reading from file: {}", e);
-            let mut conf_file = File::create(config_path).unwrap();
+            // TODO: add cmdline argument for config file
+            let mut conf_file = match File::create(config_path) {
+                Ok(file) => file,
+                Err(e) => panic!("an error occured while opening the config file: {}", e),
+            };
             if let Err(e) = writeln!(conf_file, "{}", toml::to_string(&config_default).unwrap()) {
                 eprintln!("error writing to file: {}", e)
             };
@@ -66,6 +70,5 @@ pub fn read_conf() -> Config {
             panic!("error: no config provided");
         }
     };
-    // dbg!("{:#?}", &config_content);
     config_content
 }

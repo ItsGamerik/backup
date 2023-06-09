@@ -33,7 +33,8 @@ fn compare(dirs: Vec<String>, dry_run: bool) {
         current_time.hour(),
         current_time.minute(),
         current_time.second(),
-    ).unwrap();
+    )
+    .unwrap();
     for file in dirs {
         //
         let name_as_date = match NaiveDateTime::parse_from_str(&file, "%d-%m-%Y_%H-%M-%S") {
@@ -43,13 +44,14 @@ fn compare(dirs: Vec<String>, dry_run: bool) {
                 continue;
             }
         };
-        let difference_from_current: i64 = name_as_date.signed_duration_since(current_time_fmt).num_days();
+        let difference_from_current: i64 = name_as_date
+            .signed_duration_since(current_time_fmt)
+            .num_days();
         // basically keep 4 backups: 0 days old, one day old, 3 days old, 7 days old
         if matches!(difference_from_current, 0 | -1 | -3 | -7) {
             println!("keep backup {}", file);
             continue;
         } else {
-            // TODO: delete files
             if dry_run {
                 println!("would have deleted backup {}", file);
             } else {

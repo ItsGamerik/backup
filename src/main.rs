@@ -3,9 +3,9 @@ mod retention;
 
 use std::{env, fs, path::Path};
 
+use crate::config_toml::check_and_read::Config;
 use config_toml::check_and_read::{check_conf, read_conf};
 use retention::smart_retention::backupctrl;
-use crate::config_toml::check_and_read::Config;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -21,7 +21,7 @@ fn main() {
         Err(e) => {
             eprintln!("error while trying to access file: {e}");
             return;
-        },
+        }
     };
     let mut file_name_vec: Vec<fs::DirEntry> = Vec::new();
     for file in iter {
